@@ -32,7 +32,9 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Set env
-        run: echo "REACT_NAME_URL=jkl" >> .env.dev
+        run: |
+          touch .env
+          echo "REACT_NAME_URL='jkl'" >> .env
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
