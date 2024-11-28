@@ -11,6 +11,9 @@ on:
       environment:
         description: 'Environment to run tests against'
         type: environment
+        options:
+        - development
+        - production
         required: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
