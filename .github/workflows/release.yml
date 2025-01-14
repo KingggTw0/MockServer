@@ -3,41 +3,18 @@
 name: Relase_version
 
 # Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the "main" branc
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to run tests against'
-        type: choice
-        options:
-        - development
-        - production
-        required: true
+on: push
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  build-node:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    environment: production
+    container: node:14
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: In environment
-        run: echo ${{ inputs.environment }}!
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
-
-      # Runs a single command using the runners shell
-      - name: Set env
-        run: |
-          touch .env
-          echo "REACT_NAME_URL='jkl'" >> .env
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      run: node --version
+      run: npm --version
+      uses: actions/checkout@v3
+      run: npm install
