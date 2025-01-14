@@ -1,12 +1,4 @@
-import {
-  Chart,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  registerables,
-} from "chart.js";
+import { Chart, registerables } from "chart.js";
 import { forwardRef, useEffect, useRef } from "react";
 
 /* constants */
@@ -113,12 +105,12 @@ const ChartBar = (_, refCurrent) => {
             },
             tooltip: {
               mode: "index",
-              bodyFont:(ctx,args)=>{
-                console.log(ctx.tooltipItems)
-                return{
-                  size:10
-                }
-              }
+              bodyFont: (ctx, args) => {
+                console.log(ctx.tooltipItems);
+                return {
+                  size: 10,
+                };
+              },
             },
           },
           interaction: {

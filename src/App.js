@@ -1,10 +1,7 @@
-import React, { useEffect, useReducer, useRef } from "react";
+import React, { useReducer, useRef } from "react";
 
-import logo from "./logo.svg";
 import "./App.css";
 
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import ChartBar from "./components/CharBar";
 
@@ -47,21 +44,7 @@ const textEditor = (options) => {
   );
 };
 
-const columns = [
-  {
-    header: "Name",
-    field: "name",
-    editor: (options) => textEditor(options),
-    body: ({ name, loading }) =>
-      loading ?? false ? "loadding..." : name ?? "",
-  },
-  { header: "Address", field: "address" },
-];
-
 const App = () => {
-  const [state, dispatch] = useReducer(reducer, defaultData, init);
-  const { results } = state;
-
   const refChart = useRef(null);
 
   return (
