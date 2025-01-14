@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/MockServer/static/css/main.6ab26c93.css",
+    "main.js": "/MockServer/static/js/main.512cb9f3.js",
+    "static/js/453.55bc3ed5.chunk.js": "/MockServer/static/js/453.55bc3ed5.chunk.js",
+    "index.html": "/MockServer/index.html",
+    "main.6ab26c93.css.map": "/MockServer/static/css/main.6ab26c93.css.map",
+    "main.512cb9f3.js.map": "/MockServer/static/js/main.512cb9f3.js.map",
+    "453.55bc3ed5.chunk.js.map": "/MockServer/static/js/453.55bc3ed5.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6ab26c93.css",
+    "static/js/main.512cb9f3.js"
+  ]
+}
