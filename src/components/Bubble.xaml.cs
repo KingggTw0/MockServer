@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Security;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using SharpVectors.Converters;
@@ -10,6 +12,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.IO;
 using System.Xml;
+using System.Globalization;
 
 namespace SystemTrayApp.Components
 {
@@ -22,7 +25,7 @@ namespace SystemTrayApp.Components
         {
             InitializeComponent();
 
-            RenderTextAsSvg("SVG Text ss");
+            RenderTextAsSvg("SVG Text\n Hello World!");
 
             // Thiết lập Timer để tạo bọt khí mới mỗi 0.5 giây
             timer = new DispatcherTimer();
@@ -33,19 +36,45 @@ namespace SystemTrayApp.Components
 
         private void RenderTextAsSvg(string text)
         {
-            string safeText = SecurityElement.Escape(text);
-            string svgMarkup = $@"<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'>
-                <defs> <linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='0%'> <stop offset='0%' stop-color='#4facfe'/> <stop offset='100%' stop-color='#00f2fe'/> </linearGradient> </defs>
-                <defs> <linearGradient id='textGrad' x1='0%' y1='0%' x2='0%' y2='100%'> <stop offset='0%' stop-color='#ff7e5f'/> <stop offset='100%' stop-color='#feb47b'/> </linearGradient> </defs>
-                <rect width='100%' height='100%' fill='url(#bgGrad)' rx='12' ry='12'/>
-                <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
-                      font-family='Segoe UI' font-size='38' font-weight='bold' fill='url(#textGrad)'>
-                    {safeText}
-                </text>
-            </svg>";
+            var lines = WrapTextToLines(text);
+            var lineMarkup = new StringBuilder();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var escapedLine = SecurityElement.Escape(lines[i]);
+                lineMarkup.Append(i == 0
+                    ? $"<tspan x='50%' dy='0'>{escapedLine}</tspan>"
+                    : $"<tspan x='50%' dy='1.2em'>{escapedLine}</tspan>");
+            }
 
-//             Gradient nằm phía sau nhưng chỉ hiển thị qua chữ (text như mask) — tạo hiệu ứng "text cutout" để nền gradient chỉ hiện trong lòng chữ:<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160"> <defs> <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="0%"> <stop offset="0%" stop-color="#7b92ff"/> <stop offset="100%" stop-color="#00d4ff"/> </linearGradient> <!-- mask: chữ tạo vùng trong suốt --> <mask id="textMask"> <!-- toàn vùng mặc định đen = trong suốt cho mask, nên fill white cho vùng chữ --> <rect width="100%" height="100%" fill="black"/> <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI, Arial" font-size="48" font-weight="700" fill="white"> {TEXT} </text> </mask>
-// </defs> <!-- nền gradient --> <rect width="100%" height="100%" fill="url(#bgGrad)"/> <!-- áp mask để chỉ hiển thị gradient trong chữ --> <rect width="100%" height="100%" fill="white" mask="url(#textMask)"/> </svg>
+            var fontSize = lines.Count > 2 ? "28" : "34";
+            var (svgWidth, svgHeight) = CalculateSvgSize(lines, int.Parse(fontSize));
+
+            Console.WriteLine($"SVG Size: {svgWidth} x {svgHeight}");
+
+            string svgMarkup = $@"<svg xmlns='http://www.w3.org/2000/svg'
+                    width='{svgWidth}' height='{svgHeight}' viewBox='0 0 {svgWidth} {svgHeight}'>
+                    <defs>
+                        <linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='0%'>
+                            <stop offset='0%' stop-color='#4facfe'/>
+                            <stop offset='100%' stop-color='#00f2fe'/>
+                        </linearGradient>
+                    </defs>
+                    <defs>
+                        <linearGradient id='textGrad' x1='0%' y1='0%' x2='0%' y2='100%'>
+                            <stop offset='0%' stop-color='#ff7e5f'/>
+                            <stop offset='100%' stop-color='#feb47b'/>
+                        </linearGradient>
+                    </defs>
+                    <rect width='100%' height='100%' fill='url(#bgGrad)' rx='12' ry='12'/>
+                    <text y='40' text-anchor='middle' 
+                          font-family='Segoe UI' font-size='{fontSize}' font-weight='bold'
+                          fill='url(#textGrad)'>
+                        {lineMarkup}
+                    </text>
+                </svg>";
+
+            //         dominant-baseline='middle'    Gradient nằm phía sau nhưng chỉ hiển thị qua chữ (text như mask) — tạo hiệu ứng "text cutout" để nền gradient chỉ hiện trong lòng chữ:<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160"> <defs> <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="0%"> <stop offset="0%" stop-color="#7b92ff"/> <stop offset="100%" stop-color="#00d4ff"/> </linearGradient> <!-- mask: chữ tạo vùng trong suốt --> <mask id="textMask"> <!-- toàn vùng mặc định đen = trong suốt cho mask, nên fill white cho vùng chữ --> <rect width="100%" height="100%" fill="black"/> <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="Segoe UI, Arial" font-size="48" font-weight="700" fill="white"> {TEXT} </text> </mask>
+            // </defs> <!-- nền gradient --> <rect width="100%" height="100%" fill="url(#bgGrad)"/> <!-- áp mask để chỉ hiển thị gradient trong chữ --> <rect width="100%" height="100%" fill="white" mask="url(#textMask)"/> </svg>
 
             var sr = new StringReader(svgMarkup);
 
@@ -91,6 +120,44 @@ namespace SystemTrayApp.Components
                 // Xử lý lỗi nếu cần
                 Console.WriteLine($"Error rendering SVG: {ex.Message}");
             }
+        }
+
+        private (double width, double height) CalculateSvgSize(List<string> lines, int charWidth = 10)
+        {
+            string longestLine = lines[0];
+            foreach (var line in lines)
+            {
+                if (line.Length > longestLine.Length)
+                    longestLine = line;
+            }
+
+            var formattedText = new FormattedText(
+                longestLine,
+                CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                new Typeface("Segoe UI"),
+                charWidth,
+                Brushes.Black,
+                VisualTreeHelper.GetDpi(new ContainerVisual()).PixelsPerDip
+            );
+
+            double width = Math.Max(180, formattedText.Width + charWidth);
+            double height = Math.Max(100, lines.Count * charWidth + charWidth);
+
+            return (width, height);
+        }
+
+        private List<string> WrapTextToLines(string text)
+        {
+            var words = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var lines = new List<string>();
+
+            foreach (var word in words)
+            {
+                lines.Add(word.Trim());
+            }
+
+            return lines.Count > 0 ? lines : new List<string> { "No text" };
         }
 
         private void Timer_Tick(object sender, EventArgs e)
